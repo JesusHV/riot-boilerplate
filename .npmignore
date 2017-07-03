@@ -1,0 +1,17 @@
+
+# when npm installs fail, a log is created
+npm-debug.log
+
+# mac os temp file descriptor
+.DS_Store
+
+# dont upload dependencies
+node_modules
+
+# the build of the source which is used to create test coverage
+build
+
+# the source code
+src
+
+package.json-e

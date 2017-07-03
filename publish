@@ -1,0 +1,99 @@
+#!/bin/bash
+
+search_dir="dist"
+
+getChangesType() {
+  # Get current version package.json
+  filename="package.json"
+  while read -r line
+  do
+    if [[ $line == *'"version": '* ]]
+      then
+        line=$(echo $line | sed 's/"version": "//')
+        line=$(echo $line | sed 's/",//')
+        version=$line
+        echo ""
+        echo "Current version: $version"
+        echo ""
+    fi
+  done < $filename
+  echo "What kind of changes have you done  : "
+  echo "1) Breaking changes"
+  echo "2) New feature"
+  echo "3) Fix issues"
+  read changesType
+
+  if [ $changesType = '1' ]
+    then
+      echo ""
+      incrementVersion;
+    elif [ $changesType = '2' ]
+    then
+      echo ""
+      incrementVersion;
+    elif [ $changesType = '3' ]
+    then
+      echo ""
+      incrementVersion;
+    else
+      clear
+      echo ""
+      echo "Changes type not found"
+      echo ""
+      getChangesType;
+      exit ;
+  fi
+  echo "New version is :" $newVersion
+  read -p "Do you want to publish it?  (y/n) " toPublish
+  if [ \( "$toPublish" = "y" \) -o \( "$toPublish" = "" \) ]
+    then
+      newVersion=$newVersion'",'
+      sed -i -e 's/\("version": "\).*/\1'$newVersion'/' $filename
+      npm publish;
+      echo "New version published";
+  fi
+  exit;
+}
+
+incrementVersion() {
+  indexVersion=`expr $changesType - 1`
+  IFS='.' read -ra versionSplitted <<< "$version"
+  index=`expr 0`
+  newVersion=""
+  nextValue=`expr -1`
+  for i in "${versionSplitted[@]}"; do
+    if [ $nextValue == 0 ]
+      then
+        i=$nextValue
+    elif [ $index == $indexVersion ]
+      then 
+        i=`expr $i + 1`
+        nextValue=`expr 0`
+    fi
+    newVersion=$newVersion$i"."
+    index=`expr $index + 1`
+  done
+  newVersion=${newVersion%?}
+}
+
+checkDirectory() {
+  for file in "$search_dir"/*
+  do
+    # Check file extension
+    if [ ${file: -3} == ".js" ]
+      # Module has a js file in dist/ so we can publish it
+      then
+        getChangesType;
+        exit;
+    fi
+  done
+  echo "No *.js files found"
+}
+
+clear
+if [ -d "$search_dir" ]
+  then
+    checkDirectory;
+  else
+    echo $search_dir"/ folder does not exist"
+fi

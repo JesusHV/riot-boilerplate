@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <title>Module Preview and Unit Testing</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/mocha/mocha.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <style type="text/css">
+      .blanket.bl-title {
+        display: none;
+      }
+      #es-build {
+        position: fixed;
+        top: 10px;
+        left: 5px;
+        height: 16px;
+      }
+      .es-badclass {
+        background: #FF6666;
+        padding: 4px 10px;
+        border-radius: 3px;
+      }
+      .es-goodclass {
+        background: #66FFCC;
+        padding: 4px 10px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Mocha layout -->
+    <div id="mocha"></div>
+    <div id="messages"></div>
+    <div id="fixtures"></div>
+    <div id="es-build"></div>
+
+    <!-- Testing framework -->
+    <script src="/mocha/mocha.js"></script>
+    <script src="/chai/chai.js"></script>
+    <script src="/chai-jq/chai-jq.js"></script>
+    <script>
+      const expect = chai.expect;
+      expect(true).to.equal(!!true);
+
+      mocha.setup('bdd');
+      mocha.suite.afterAll(function () {
+        setTimeout(function () {
+          const percent = Number(document.querySelectorAll('.bl-cl.rs')[2].innerHTML.split(' ')[0]);
+          ___browserSync___.socket.emit('coverage', percent);
+          ___browserSync___.socket.on('build', function (msg) {
+            document.getElementById('es-build').innerHTML = msg;
+          });
+        }, 0);
+      });
+    </script>
+
+    <!-- Dependencies -->
+    <script src="/riot/riot+compiler.js"></script>
+
+    <!-- Module -->
+    <script src="/src/index.js"></script>
+
+    <!-- Coverage -->
+    <script data-cover-flags="commonJS" data-cover-only="src/" src="/vendor/blanket.min.js"></script>
+    <script src="/vendor/mocha-blanket.js"></script>
+
+    <!-- Spec -->
+    <script src="/spec/setup.js"></script>
+    <script src="/spec/test.js"></script>
+  </body>
+</html>
